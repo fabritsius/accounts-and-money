@@ -1,0 +1,30 @@
+{
+  "name": "accounts-with-money-api",
+  "version": "1.0.0",
+  "description": "An API service for \"Accounts with Money\" application",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app",
+    "dev": "nodemon app"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fabritsius/accounts-with-money.git"
+  },
+  "keywords": [
+    "node.js"
+  ],
+  "author": "Anton @fabritsius",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fabritsius/accounts-with-money/issues"
+  },
+  "homepage": "https://github.com/fabritsius/accounts-with-money#readme",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "express": "^4.17.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.19.1"
+  }
+}
