@@ -20,7 +20,7 @@ app.use(logger);
 app.get('/balance', (req, res) => {
     
     handleBalanceRequest(res, {
-        account: req.body.account
+        userId: req.body.userId
     });
 });
 
@@ -57,16 +57,23 @@ app.post('/authenticate', (req, res) => {
 
 const handleBalanceRequest = (response, balanceRequest) => {
     
-    sendRabbitMessage('balances', balanceRequest, (err, currentBalance) => {
+    sendRabbitMessage('balances', balanceRequest, (err, rabbitResponse) => {
         
         if (err) {
             console.error(err);
         }
 
+        if (!rabbitResponse.success) {
+            return response.send({
+                success: false,
+                message: rabbitResponse.message
+            });
+        }
+
         response.send({
             success: true,
             message: 'Balance checked',
-            data: currentBalance
+            data: rabbitResponse.data
         });
     });
 }
