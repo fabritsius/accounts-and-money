@@ -1,7 +1,7 @@
 {
-  "name": "accounts-with-money-api",
+  "name": "accounts-with-money-transaction-handler",
   "version": "1.0.0",
-  "description": "An API service for \"Accounts with Money\" application",
+  "description": "A service which handles money transactions for \"Accounts with Money\" application",
   "main": "app.js",
   "scripts": {
     "start": "node app",
@@ -21,10 +21,7 @@
   },
   "homepage": "https://github.com/fabritsius/accounts-with-money#readme",
   "dependencies": {
-    "amqplib": "^0.5.5",
-    "body-parser": "^1.19.0",
-    "express": "^4.17.1",
-    "uuid": "^3.3.2"
+    "amqplib": "^0.5.5"
   },
   "devDependencies": {
     "nodemon": "^1.19.1"

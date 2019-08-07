@@ -2,6 +2,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const logger = require('./middleware/logger');
+const sendRabbitMessage = require('./logic/rabbitmq');
 
 // Init the App
 
@@ -17,39 +18,32 @@ app.use(logger);
 // Set routes
 
 app.get('/balance', (req, res) => {
-    return res.send({
-        success: true,
-        message: 'Balance checked',
-        data: {
-            balance:  0,
-            lastUpdated: 'never'
-        }
+    
+    handleBalanceRequest(res, {
+        account: req.body.account
     });
 });
 
 app.post('/charge', (req, res) => {
-    return res.send({
-        success: true,
-        message: 'Charge successful',
-        data: {
-            balance:  0,
-            lastUpdated: 'now'
-        }
+
+    handleTransaction(res, {
+        type: 'charge',
+        account: req.body.account,
+        amount: req.body.amount
     });
 });
 
 app.post('/deposit', (req, res) => {
-    return res.send({
-        success: true,
-        message: 'Deposit successful',
-        data: {
-            balance:  0,
-            lastUpdated: 'now'
-        }
+
+    handleTransaction(res, {
+        type: 'deposit',
+        account: req.body.account,
+        amount: req.body.amount
     });
 });
 
 app.post('/authenticate', (req, res) => {
+    
     return res.send({
         success: true,
         message: 'Authentication successful',
@@ -58,6 +52,40 @@ app.post('/authenticate', (req, res) => {
         }
     });
 });
+
+// Create request handlers
+
+const handleBalanceRequest = (response, balanceRequest) => {
+    
+    sendRabbitMessage('balances', balanceRequest, (err, currentBalance) => {
+        
+        if (err) {
+            console.error(err);
+        }
+
+        response.send({
+            success: true,
+            message: 'Balance checked',
+            data: currentBalance
+        });
+    });
+}
+
+const handleTransaction = (response, transactionRequst) => {
+    
+    sendRabbitMessage('transactions', transactionRequst, (err, updatedBalance) => {
+        
+        if (err) {
+            console.error(err);
+        }
+
+        response.send({
+            success: true,
+            message: 'Operation successful',
+            data: updatedBalance
+        });
+    });
+}
 
 // Start the server
 
