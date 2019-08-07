@@ -28,7 +28,7 @@ app.post('/charge', (req, res) => {
 
     handleTransaction(res, {
         type: 'charge',
-        account: req.body.account,
+        userId: req.body.userId,
         amount: req.body.amount
     });
 });
@@ -37,7 +37,7 @@ app.post('/deposit', (req, res) => {
 
     handleTransaction(res, {
         type: 'deposit',
-        account: req.body.account,
+        userId: req.body.userId,
         amount: req.body.amount
     });
 });
@@ -80,16 +80,24 @@ const handleBalanceRequest = (response, balanceRequest) => {
 
 const handleTransaction = (response, transactionRequst) => {
     
-    sendRabbitMessage('transactions', transactionRequst, (err, updatedBalance) => {
+    sendRabbitMessage('transactions', transactionRequst, (err, rabbitResponse) => {
         
         if (err) {
             console.error(err);
         }
 
+        if (!rabbitResponse.success) {
+            return response.send({
+                success: false,
+                message: rabbitResponse.message,
+                data: rabbitResponse.data
+            });
+        }
+
         response.send({
             success: true,
             message: 'Operation successful',
-            data: updatedBalance
+            data: rabbitResponse.data
         });
     });
 }
