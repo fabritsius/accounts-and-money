@@ -133,7 +133,7 @@ const handleTransaction = (response, transactionRequst) => {
 
 // Start the server
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 80;
 
 app.listen(port, () => {
     console.log(`An API service is listening on port ${port}`);

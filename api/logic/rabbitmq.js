@@ -13,7 +13,7 @@ const establishRabbitConnection = () => {
         ]);
     }
     
-    return amqp.connect('amqp://localhost').then((connection) => {
+    return amqp.connect('amqp://rabbit:rabbitpass@rabbitmq').then((connection) => {
         
         const closeConnection = () => {
             channel = null;
@@ -59,8 +59,8 @@ const sendRabbitMessage = (theQueue, data, callback) => {
             return closeConnection();
         });
     }).catch((err) => {
-        console.log(err);
-        return callback(err, null);
+        console.log('Rabbitmq connection error:');
+        throw err;
     });
 }
 

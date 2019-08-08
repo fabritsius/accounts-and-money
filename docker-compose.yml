@@ -1,0 +1,51 @@
+version: "3"
+
+services:
+
+  api:
+    build: ./api
+    ports:
+      - "80:80"
+    links:
+      - "rabbitmq"
+    depends_on:
+      - "balancechecker"
+      - "transactionhandler"
+    restart: on-failure:5
+
+  balancechecker:
+    build: ./balance_checker
+    links:
+      - "rabbitmq"
+      - "db"
+    depends_on:
+      - "rabbitmq"
+      - "db"
+    restart: on-failure:5
+
+  transactionhandler:
+    build: ./transaction_handler
+    links:
+      - "rabbitmq"
+      - "db"
+    depends_on:
+      - "rabbitmq"
+      - "db"
+    restart: on-failure:5
+
+  rabbitmq:
+    image: rabbitmq
+    expose:
+      - "5672"
+    environment:
+      RABBITMQ_DEFAULT_USER: rabbit
+      RABBITMQ_DEFAULT_PASS: rabbitpass
+    restart: on-failure:5
+
+  db:
+    image: postgres
+    expose:
+      - "5432"
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mysecretpassword}
+    restart: on-failure:5

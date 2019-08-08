@@ -3,26 +3,31 @@ const db = require('./logic/dbcreator');
 
 processMessages(async (msg) => {
 
-    let operation;
-
-    if (msg.type === 'charge') {
-        operation = await handleCharge(msg.userId, msg.amount);
-    } else if (msg.type === 'deposit') {
-        operation = await handleDeposit(msg.userId, msg.amount);
-    } else {
+    try {
+        let operation;
+    
+        if (msg.type === 'charge') {
+            operation = await handleCharge(msg.userId, msg.amount);
+        } else if (msg.type === 'deposit') {
+            operation = await handleDeposit(msg.userId, msg.amount);
+        } else {
+            return {
+                success: false,
+                message: 'Unknown transaction operation'
+            }
+        }
+    
+        if (operation) {
+            return operation;
+        }
+    
         return {
             success: false,
-            message: 'Unknown transaction operation'
+            message: 'Can\'t find the account with a given userId'
         }
-    }
-
-    if (operation) {
-        return operation;
-    }
-
-    return {
-        success: false,
-        message: 'Can\'t find the account with a given userId'
+    } catch(err) {
+        console.log('Messaging error:');
+        throw err;
     }
 });
 
