@@ -1,58 +1,66 @@
-const amqp = require('amqplib/callback_api');
+const amqp = require('amqplib');
 const uuid = require('uuid/v4');
 
-const sendRabbitMessage = (theQueue, data, callback) => {
-    amqp.connect('amqp://localhost', (err, connection) => {
+let channel;
+let closeConnection;
 
-        const sendResult = (err, data) => {
-            callback(err, data);
-                        
-            setTimeout(() => { 
+const establishRabbitConnection = () => {
+    
+    if (channel) {
+        return Promise.all([
+            Promise.resolve(channel),
+            Promise.resolve(closeConnection)
+        ]);
+    }
+    
+    return amqp.connect('amqp://localhost').then((connection) => {
+        
+        const closeConnection = () => {
+            channel = null;
+            setTimeout(() => {
                 connection.close(); 
             }, 500);
         }
-    
-        if (err) {
-            console.error('amqp connection error:');
-            throw err;
-        }
 
-        connection.createChannel((err, channel) => {
+        console.log('Connection created');
+        return Promise.all([
+            connection.createChannel(),
+            Promise.resolve(closeConnection)
+        ]);
+    });
+}
+
+const sendRabbitMessage = (theQueue, data, callback) => {
+    establishRabbitConnection().then((connection) => {
+
+        [channel, closeConnection] = connection;
+
+        channel.assertQueue('', { exclusive: true }).then((q) => {
             
-            if (err) {
-                console.error('amqp create channel error:', err);
-                return sendResult(err, null);
-            }
-
-            channel.assertQueue('', {
-                exclusive: true
-            }, (err, q) => {
-                
-                if (err) {
-                    console.error('amqp channel error:', err);
-                    return sendResult(err, null);
-                }
-                
-                const correlationId = uuid();
-            
-                channel.consume(q.queue, (msg) => {
-                    
-                    if (msg.properties.correlationId == correlationId) {
-
-                        const data = JSON.parse(msg.content);
-                        return sendResult(null, data);
-                    }
-                }, {
-                    noAck: true
-                });
+            const correlationId = uuid();
         
-                channel.sendToQueue(theQueue,
-                    Buffer.from(JSON.stringify(data)), { 
-                        correlationId: correlationId, 
-                        replyTo: q.queue
-                    });
+            channel.consume(q.queue, (msg) => {
+                
+                if (msg.properties.correlationId == correlationId) {
+                    const data = JSON.parse(msg.content);
+                    return callback(null, data);
+                }
+            }, {
+                noAck: true
             });
+            
+            channel.sendToQueue(theQueue,
+                Buffer.from(JSON.stringify(data)), { 
+                    correlationId: correlationId, 
+                    replyTo: q.queue
+                });
+        }).catch((err) => {
+            console.error('amqp channel error:', err);
+            return closeConnection();
         });
+    }).catch((err) => {
+        console.log(err);
+        return callback(err, null);
     });
 }
 
