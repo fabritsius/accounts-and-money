@@ -1,8 +1,13 @@
 const express = require('express');
 const bodyParser = require('body-parser');
+const jwt = require('jsonwebtoken');
 
 const logger = require('./middleware/logger');
+const tokenCheck = require('./middleware/tokenchecker');
+
 const sendRabbitMessage = require('./logic/rabbitmq');
+
+const config = require('./config');
 
 // Init the App
 
@@ -17,14 +22,14 @@ app.use(logger);
 
 // Set routes
 
-app.get('/balance', (req, res) => {
+app.get('/balance', tokenCheck, (req, res) => {
     
     handleBalanceRequest(res, {
         userId: req.body.userId
     });
 });
 
-app.post('/charge', (req, res) => {
+app.post('/charge', tokenCheck, (req, res) => {
 
     handleTransaction(res, {
         type: 'charge',
@@ -33,7 +38,7 @@ app.post('/charge', (req, res) => {
     });
 });
 
-app.post('/deposit', (req, res) => {
+app.post('/deposit', tokenCheck, (req, res) => {
 
     handleTransaction(res, {
         type: 'deposit',
@@ -44,13 +49,37 @@ app.post('/deposit', (req, res) => {
 
 app.post('/authenticate', (req, res) => {
     
-    return res.send({
-        success: true,
-        message: 'Authentication successful',
-        data: {
-            token: "GciOiJIUzI1NiIsInR5cCI6IkpXVCJ9"
+    const username = req.body.username;
+    const password = req.body.password;
+
+    if (username && password) {
+
+        if (username in config.mockedUsers && 
+            password === config.mockedUsers[username]) {
+
+            const token = jwt.sign({username}, config.secret, { expiresIn: '24h'});
+            
+            return res.send({
+                success: true,
+                message: 'Authentication successful',
+                data: { 
+                    token
+                }
+            }); 
+        } else {
+
+            return res.send({
+                success: false,
+                message: 'Not valid username or password'
+            });
         }
-    });
+    } else {
+
+        return res.send({
+            success: false,
+            message: 'Missing username or password'
+        });
+    }
 });
 
 // Create request handlers
