@@ -26,9 +26,6 @@ const establishRabbitConnection = () => {
             connection.createChannel(),
             Promise.resolve(closeConnection)
         ]);
-    }).catch((err) => {
-        console.log('Rabbitmq connection error:');
-        throw err;
     });
 }
 
@@ -61,8 +58,8 @@ const processMessages = (responseHandler) => {
             }); 
         });
     }).catch((err) => {
-        console.log('Rabbitmq messaging error:');
-        throw err;
+        console.log('Rabbitmq messaging error!!!');
+        process.exit(1);
     });
 }
 

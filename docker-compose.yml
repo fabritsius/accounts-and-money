@@ -11,7 +11,7 @@ services:
     depends_on:
       - "balancechecker"
       - "transactionhandler"
-    restart: on-failure:5
+    restart: always
 
   balancechecker:
     build: ./balance_checker
@@ -21,7 +21,7 @@ services:
     depends_on:
       - "rabbitmq"
       - "db"
-    restart: on-failure:5
+    restart: always
 
   transactionhandler:
     build: ./transaction_handler
@@ -31,7 +31,7 @@ services:
     depends_on:
       - "rabbitmq"
       - "db"
-    restart: on-failure:5
+    restart: always
 
   rabbitmq:
     image: rabbitmq
@@ -40,7 +40,7 @@ services:
     environment:
       RABBITMQ_DEFAULT_USER: rabbit
       RABBITMQ_DEFAULT_PASS: rabbitpass
-    restart: on-failure:5
+    restart: always
 
   db:
     image: postgres
@@ -48,4 +48,4 @@ services:
       - "5432"
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-mysecretpassword}
-    restart: on-failure:5
+    restart: always
