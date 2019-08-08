@@ -20,4 +20,4 @@ To run this project locally you need only [`Docker`](https://www.docker.com/):
 
 The API is protected by JWT Token.<br>
 The token is passed in the header with the `x-app-token` key.<br>
-Get the token at `/authenticate` (find password in the [config.js](./config.js) file)
+Get the token at `/authenticate` (find password in the [config.js](./api/config.js) file)
