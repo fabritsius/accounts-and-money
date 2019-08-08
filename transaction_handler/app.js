@@ -29,7 +29,7 @@ processMessages(async (msg) => {
 const handleCharge = (userId, amount) => {
     return db.from('accounts')
         .where('userId', '=', userId)
-        .where('balance', '>', amount)
+        .where('balance', '>=', amount)
         .returning('*')
         .update({
             balance: db.raw(`balance - ${amount}`),
@@ -50,11 +50,15 @@ const handleCharge = (userId, amount) => {
                 .where('userId', '=', userId)
                 .first()
             .then((firstMatch) => {
-                return {
-                    success: false,
-                    message: 'Not enough money, no changes',
-                    data: firstMatch
+                if (firstMatch) {
+                    return {
+                        success: false,
+                        message: 'Not enough money, no changes',
+                        data: firstMatch
+                    }
                 }
+
+                return null;
             });
         }
     }).catch((err) => {
@@ -71,13 +75,17 @@ const handleDeposit = (userId, amount) => {
             lastUpdated: db.fn.now(6)
         })
     .then((rows) => {
-        return {
-            success: true,
-            data: {
-                balance: rows[0].balance,
-                lastUpdated: rows[0].lastUpdated
-            }
-        };
+        if (rows.length === 1) {
+            return {
+                success: true,
+                data: {
+                    balance: rows[0].balance,
+                    lastUpdated: rows[0].lastUpdated
+                }
+            };
+        }
+
+        return null;
     }).catch((err) => {
         return null;
     });
