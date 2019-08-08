@@ -1,5 +1,6 @@
 const amqp = require('amqplib');
 
+
 let channel;
 let closeConnection;
 
@@ -16,6 +17,7 @@ const establishRabbitConnection = () => {
         
         const closeConnection = () => {
             channel = null;
+            closeConnection = null;
             setTimeout(() => {
                 connection.close(); 
             }, 500);
@@ -26,6 +28,10 @@ const establishRabbitConnection = () => {
             connection.createChannel(),
             Promise.resolve(closeConnection)
         ]);
+    }).then((connection) => {
+        channel = connection[0];
+        closeConnection = connection[1];
+        return Promise.resolve(connection);
     });
 }
 
