@@ -1,6 +1,8 @@
 # Accounts with Money
 
-Demo REST API Application which uses Microservice Architecture to manipulate Money Accounts.
+Demo REST API which uses Microservice Architecture to manipulate Money Accounts.
+
+The App consists from 5 Microservices, each has its own Docker Container.
 
 ## Usage
 
