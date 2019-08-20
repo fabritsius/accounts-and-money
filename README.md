@@ -1,4 +1,4 @@
-# Accounts with Money
+# Accounts & Money
 
 Demo REST API which uses Microservice Architecture to manipulate Money Accounts.
 
@@ -21,5 +21,11 @@ To run this project locally you need only [`Docker`](https://www.docker.com/):
 - `POST /authenticate {username, password}`
 
 The API is protected by JWT Token.<br>
-The token is passed in the header with the `x-app-token` key.<br>
+The token is passed in the header with the `Authorization` key.<br>
 Get the token at `/authenticate` (find password in the [config.js](./api/config.js) file)
+
+## Possible Improvements
+
+- add Redis Caching for GET requests
+- add a simple client for the API
+- add API methods for adding (removing) users from the DB
